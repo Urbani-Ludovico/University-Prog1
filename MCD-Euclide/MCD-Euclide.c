@@ -3,11 +3,11 @@
 void main() {
   int x;
   printf("\nPrimo numero :  ");
-  int n = scanf("%d", &x);
+  scanf("%d", &x);
 
   int y;
   printf("Secondo numero :  ");
-  n = scanf("%d", &y);
+  scanf("%d", &y);
 
   while (x != y) {
     if (x > y)
