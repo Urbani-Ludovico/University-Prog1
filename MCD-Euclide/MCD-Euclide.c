@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main() {
+void main() {
   int x;
   printf("\nPrimo numero :  ");
   int n = scanf("%d", &x);
@@ -17,6 +17,4 @@ int main() {
   }
 
   printf("\nMCD = %d\n\n", x);
-  
-  return 0;
 }

@@ -1,4 +1,4 @@
-{ pkgs }: {
+cd { pkgs }: {
     deps = [
         pkgs.bashInteractive
     ];
