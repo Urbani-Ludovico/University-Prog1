@@ -8,6 +8,10 @@ int Fbn(int i, int n, int n1, int n2) {
     }
 }
 
+void Output(int n, int res) {
+    printf("\nF(%d) = %d\n", n, res);
+}
+
 int main() {
     int n;
     printf("Fn -> Inserisci n :  ");
@@ -26,11 +30,11 @@ int main() {
 
         // Using recursive function
         if (n == 0) {
-            printf("\nResult = %d\n", 0);
+            Output(n, 0);
         } else if (n == 1) {
-            printf("\nResult = %d\n", 1);
+            Output(n, 1);
         } else {
-            printf("\nResult = %d\n", Fbn(2, n, 0, 1));
+            Output(n, Fbn(2, n, 0, 1));
         }
     } else {
         printf("\nWarning: N must be greather thank 0\n");
