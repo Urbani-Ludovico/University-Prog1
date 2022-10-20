@@ -12,9 +12,11 @@ void main() {
     if (n >= k){
         int res = 1;
         for (int i = n; i > 0; i--) {
-            if (i > n - k) // n! / (n-k)! => exclude all factors < n-k
+            // If k > n-k then number betwheen k and n-k , shud be factors and divisors. So we can exclude this numbers.
+            // Not using three IF, we can add && ... in each cond block
+            if (i > n - k && i > k) // n! / (n-k)! => exclude all factors < n-k && factors that should be revoved by k!
                 res = res * i;
-            if (i <= k) // 1/k! complete (n k) removing k!
+            if (i <= k && i <= n - k) // 1/k! complete (n k) removing k! (excluded factors that should be added by n!)
                 res = res / i;
         }
 
