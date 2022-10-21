@@ -20,7 +20,7 @@ int main() {
     if (n >= 0) {
         // If you want to use a normal for loop
         /*int N1 = 0;
-        int N2 = 2;
+        int N2 = 1;
         for (int i = 1; i < n; i++) {
             int tmp = N1 + N2;
             N1 = N2;
