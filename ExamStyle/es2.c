@@ -8,9 +8,9 @@ int F1(int n, int k) {
 }
 
 int F2(int a, int b) {
-    int s = F1(a, 0);
-    for (int i = a + 1; i <= b; i++) {
-        s = 2 * s + i;
+    int s = 0;
+    for (int i = a; i <= b; i++) {
+        s = s + F1(i, 0);
     }
     return s;
 }
