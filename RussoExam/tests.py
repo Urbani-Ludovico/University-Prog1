@@ -1,7 +1,7 @@
 
 import unittest
 
-from esame import ExamException, CSVFile, CSVTimeSeriesFile
+from esame import ExamException, CSVFile, CSVTimeSeriesFile, compute_daily_max_difference
 
 class TestCSVFile(unittest.TestCase):
     
@@ -58,6 +58,20 @@ class TestCSVTimeSeriesFile(unittest.TestCase):
     def test_temps_int(self):
         c = CSVTimeSeriesFile("data_test_CSVTimeSeriesFile7.csv")
         self.assertEqual(c.get_data(), [[1551398400, 21], [1551402000, 22], [1551405600, 23]])
+        
+
+class TestCompute(unittest.TestCase):
+    def test_purify(self):
+        self.assertEqual(compute_daily_max_difference([["3545",3], [3546.5, 5.0]]), [2.0])
+        
+    def test_purify_none(self):
+        self.assertEqual(compute_daily_max_difference([["3545",3]]), [None])
+        
+    def test_purify_empty(self):
+        self.assertEqual(compute_daily_max_difference([["ciao",3]]), [])
+        
+    def test_correct(self):
+        self.assertEqual(compute_daily_max_difference([[1675077364, 25.30], [1675077387, 27.24]]), [27.24-25.30])
         
         
 if __name__ == '__main__':

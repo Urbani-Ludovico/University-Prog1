@@ -31,6 +31,9 @@ class CSVTimeSeriesFile(CSVFile):
         
     def get_data(self):
         data = super().get_data()
+        return self.purify_data(data)
+    
+    def purify_data(self, data):
         purified_data = []
         
         for item in data:
@@ -48,7 +51,6 @@ class CSVTimeSeriesFile(CSVFile):
                 temperature = float(item[1])
                 new_row.append(temperature)
                 
-                
             except IndexError as e:
                 # Row has less than two elements
                 to_add = False
@@ -61,6 +63,16 @@ class CSVTimeSeriesFile(CSVFile):
                 purified_data.append(new_row)
         
         return purified_data
+    
+    def is_data_purified(self, data):
+        if not isinstance(data, list):
+            return False
+        
+        for item in data:
+            if not isinstance(item, list) or not isinstance(item[0], int) or not isinstance(item[1], float):
+                return False
+        
+        return True
 
 class Epoch(object):
     def __init__(self, epoch = None):
@@ -94,6 +106,8 @@ class DayTemps(object):
         
 
 def compute_daily_max_difference(data):
+    if not CSVTimeSeriesFile.is_data_purified(None, data):
+        data = CSVTimeSeriesFile.purify_data(None, data)
     last_date = None
     day_data = DayTemps()
     
@@ -117,8 +131,9 @@ def compute_daily_max_difference(data):
     return output
 
 
-# x = CSVTimeSeriesFile("data.csv")
-# print(x.get_data())
-# d = compute_daily_max_difference(x.get_data())
-# for item in d:
-#     print(item)
+if __name__ == "__main__":
+    x = CSVTimeSeriesFile("data.csv")
+    # print(x.get_data())
+    # d = compute_daily_max_difference(x.get_data())
+    # for item in d:
+    #     print(item)
