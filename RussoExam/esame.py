@@ -1,4 +1,6 @@
 
+import io
+
 class ExamException(Exception):
     pass
 
@@ -8,7 +10,18 @@ class CSVFile(object):
         
     def get_data(self):
         file = self.open()
-        data = [item.split(",") for item in file.read().split("\n")]
+        
+        try:
+            data = [item.split(",") for item in file.read().split("\n")]
+            
+        except TypeError as e:
+            # File not readable
+            raise ExamException(str(e))
+        
+        except io.UnsupportedOperation as e:
+            # Data not iterable
+            raise ExamException(str(e))
+        
         file.close()
         
         return data
@@ -36,6 +49,11 @@ class CSVTimeSeriesFile(CSVFile):
     def purify_data(self, data):
         purified_data = []
         
+        try:
+            iter(data)
+        except TypeError as e:
+            raise ExamException(str(e))
+        
         for item in data:
             new_row = []
             to_add = True
@@ -61,8 +79,18 @@ class CSVTimeSeriesFile(CSVFile):
                 
             if to_add:
                 purified_data.append(new_row)
+                
+        self.check_order(purified_data)
         
         return purified_data
+    
+    def check_order(self, data, raise_exam = True):
+        for n in range(1, len(data)):
+            if not data[n-1] < data[n]:
+                if raise_exam:
+                    raise ExamException("File not ordered")
+                return False
+        return True
     
     def is_data_purified(self, data):
         if not isinstance(data, list):
@@ -72,7 +100,7 @@ class CSVTimeSeriesFile(CSVFile):
             if not isinstance(item, list) or not isinstance(item[0], int) or not isinstance(item[1], float):
                 return False
         
-        return True
+        return self.check_order(data)
 
 class Epoch(object):
     def __init__(self, epoch = None):
@@ -80,7 +108,9 @@ class Epoch(object):
         self.day = self.date_get_day(self.epoch)
         
     def date_get_day(self, date):
-        return date - (date % 86400)
+        if date >= 0:
+            return date - (date % 86400)
+        return (abs(date) - (abs(date) % 86400)) * (-1)
     
     def __lt__(self, other): # less than in epoch comparison
         if isinstance(other, Epoch):
@@ -106,8 +136,8 @@ class DayTemps(object):
         
 
 def compute_daily_max_difference(data):
-    if not CSVTimeSeriesFile.is_data_purified(None, data):
-        data = CSVTimeSeriesFile.purify_data(None, data)
+    if not CSVTimeSeriesFile().is_data_purified(data):
+        data = CSVTimeSeriesFile().purify_data(data)
     last_date = None
     day_data = DayTemps()
     
