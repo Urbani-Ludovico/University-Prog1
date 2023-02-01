@@ -108,7 +108,7 @@ class CSVTimeSeriesFile(CSVFile):
             if not isinstance(item, list) or not isinstance(item[0], int) or not isinstance(item[1], float):
                 return False
         
-        return self.check_order(data)
+        return self.check_order(data, raise_exam = False)
 
 class Epoch(object):
     def __init__(self, epoch = None):
@@ -166,7 +166,6 @@ def compute_daily_max_difference(data):
             # print(max(day_data.data[day]), min(day_data.data[day]))
             output.append(max(day_data.data[day]) - min(day_data.data[day]))
     
-    print(day_data.data)
     return output
 
 
