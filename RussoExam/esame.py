@@ -1,5 +1,5 @@
 
-import io
+from io import UnsupportedOperation
 
 class ExamException(Exception):
     pass
@@ -18,8 +18,12 @@ class CSVFile(object):
             # File not readable
             raise ExamException(str(e))
         
-        except io.UnsupportedOperation as e:
+        except UnsupportedOperation as e:
             # Data not iterable
+            raise ExamException(str(e))
+        
+        except AttributeError as e:
+            # Read data or item has not split attribute
             raise ExamException(str(e))
         
         file.close()
@@ -35,6 +39,10 @@ class CSVFile(object):
         
         except TypeError as e:
             # When open receive data different from string
+            raise ExamException(str(e))
+        
+        except OSError as e:
+            # Others os errors
             raise ExamException(str(e))
     
     
@@ -158,12 +166,13 @@ def compute_daily_max_difference(data):
             # print(max(day_data.data[day]), min(day_data.data[day]))
             output.append(max(day_data.data[day]) - min(day_data.data[day]))
     
+    print(day_data.data)
     return output
 
 
 if __name__ == "__main__":
     x = CSVTimeSeriesFile("data.csv")
     # print(x.get_data())
-    # d = compute_daily_max_difference(x.get_data())
-    # for item in d:
-    #     print(item)
+    d = compute_daily_max_difference(x.get_data())
+    for item in d:
+        print(item)

@@ -142,7 +142,13 @@ class TestCompute(unittest.TestCase):
         
     def test_correct(self):
         self.assertEqual(compute_daily_max_difference([[1675077364, 25.30], [1675077387, 27.24]]), [27.24-25.30])
+       
+    def test_correct2(self):
+        self.assertEqual(compute_daily_max_difference([[100, -4.35], [1675077364, 25.30], [1675077387, 27.24]]), [None, 27.24-25.30])
         
+    def test_correct_negative(self):
+        self.assertEqual(compute_daily_max_difference([[1675077364, -4.13], [1675077387, 27.24]]), [27.24-(-4.13)])
+       
         
 if __name__ == '__main__':
     unittest.main()
