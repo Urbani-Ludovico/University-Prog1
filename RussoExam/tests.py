@@ -4,7 +4,6 @@ import unittest
 from esame import ExamException, CSVFile, CSVTimeSeriesFile, Epoch, DayTemps, compute_daily_max_difference
 
 
-# @unittest.skip
 class TestCSVFile(unittest.TestCase):
     def test_open_type(self):
         c = CSVFile()
@@ -29,9 +28,16 @@ class TestCSVFile(unittest.TestCase):
     def test_get_data_twolines(self):
         c = CSVFile("data_test_CSVFile3.csv")
         self.assertEqual(c.get_data(), [["3"], ["5", "b"]])
+        
+    def test_get_correct(self):
+        c = CSVFile("data_test_CSVFile4.csv")
+        self.assertEqual(c.get_data(), [["1551398400", "21.50"], ["1551402000", "21.40"]])
 
+    def test_get_correct2(self):
+        c = CSVFile("data_test_CSVFile5.csv")
+        self.assertEqual(c.get_data(), [["epoch", "temperature"], ["1551398400", "21.50"]])
+        
 
-# @unittest.skip
 class TestCSVTimeSeriesFile(unittest.TestCase):
     def test_correct(self):
         c = CSVTimeSeriesFile("data_test_CSVTimeSeriesFile.csv")
@@ -69,8 +75,7 @@ class TestCSVTimeSeriesFile(unittest.TestCase):
         c = CSVTimeSeriesFile("data_test_CSVTimeSeriesFile9.csv")
         self.assertRaises(ExamException, c.get_data)
        
-        
-# @unittest.skip
+       
 class TestEpoch(unittest.TestCase):
     def test_correct(self):
         self.assertEqual(Epoch(86410).day, 86400)
@@ -79,10 +84,10 @@ class TestEpoch(unittest.TestCase):
         self.assertEqual(Epoch(172800).day, 172800)
         
     def test_correct3(self):
-        self.assertEqual(Epoch(-100).day, 0)
+        self.assertEqual(Epoch(-100).day, -86400)
         
     def test_correct4(self):
-        self.assertEqual(Epoch(-86410).day, -86400)
+        self.assertEqual(Epoch(-86410).day, -172800)
         
     def test_lt_(self):
         self.assertTrue(Epoch(10) < Epoch(86410))
@@ -108,8 +113,7 @@ class TestEpoch(unittest.TestCase):
     def test_gt_4(self):
         self.assertFalse(Epoch(100) > Epoch(100))
         
-        
-# @unittest.skip
+
 class TestDayTemps(unittest.TestCase):
     def test_correct(self):
         dt = DayTemps()
@@ -126,7 +130,6 @@ class TestDayTemps(unittest.TestCase):
         self.assertEqual(dt.days, [86400, 172800])
         
 
-# @unittest.skip
 class TestCompute(unittest.TestCase):
     def test_purify(self):
         self.assertEqual(compute_daily_max_difference([["3545",3], [3546.5, 5.0]]), [2.0])
@@ -148,7 +151,17 @@ class TestCompute(unittest.TestCase):
         
     def test_correct_negative(self):
         self.assertEqual(compute_daily_max_difference([[1675077364, -4.13], [1675077387, 27.24]]), [27.24-(-4.13)])
-       
+    
+    def test_correct_tuple(self):
+        self.assertEqual(compute_daily_max_difference(((1675077364, -4.13), (1675077387, 27.24))), [27.24-(-4.13)])
+        
+    def test_negative_epoch(self):
+        self.assertEqual(compute_daily_max_difference([[-1000, 20], [-100, 25]]), [25-20])
+        
+    def test_negative_positive(self):
+        self.assertEqual(compute_daily_max_difference([[-100, 10], [100, 10]]), [None, None])
+        
+        
         
 if __name__ == '__main__':
     unittest.main()

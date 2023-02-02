@@ -6,9 +6,22 @@ class ExamException(Exception):
 
 class CSVFile(object):
     def __init__(self, path = None):
+        """
+            Args:
+                str path = None: filename of dataset
+        """
         self.path = path
         
     def get_data(self):
+        """
+            Open file and split data into rows and columns of strings
+
+            Raises:
+                ExamException
+
+            Returns:
+                list<list<str +>>
+        """
         file = self.open()
         
         try:
@@ -31,6 +44,15 @@ class CSVFile(object):
         return data
     
     def open(self):
+        """
+            Open and test file
+
+            Raises:
+                ExamException
+
+            Returns:
+                file stream
+        """
         try:
             return open(self.path, "r")
         
@@ -48,13 +70,37 @@ class CSVFile(object):
     
 class CSVTimeSeriesFile(CSVFile):
     def __init__(self, name = None):
+        """
+            Args:
+                str path = None: filename of dataset
+        """
         super().__init__(path = name)
         
     def get_data(self):
+        """
+            Open and purify data
+
+            Returns:
+                list<list<int, float>>
+        """
         data = super().get_data()
         return self.purify_data(data)
     
     def purify_data(self, data):
+        """
+            Purify data
+            Keep only row that can be casted int [int, float], removing elements after index 1
+            Function does not modify original data
+
+            Args:
+                list<list<str +>> data
+
+            Raises:
+                ExamException
+
+            Returns:
+                list<list<int, float>>
+        """
         purified_data = []
         
         try:
@@ -71,6 +117,7 @@ class CSVTimeSeriesFile(CSVFile):
                     date = int(date)
                 except ValueError as e:
                     # For dates in format float
+                    # If neither this format match data, line will be removed in the expept of parent level
                     date = int(float(date))
                 new_row.append(date)
                 
@@ -93,6 +140,19 @@ class CSVTimeSeriesFile(CSVFile):
         return purified_data
     
     def check_order(self, data, raise_exam = True):
+        """
+            Check if dataset is ordered and it does not have duplicate epoch
+            
+            Args:
+                list<list<int, float>> data
+                bool raise_exam: for disable raising
+
+            Raises:
+                ExamException
+
+            Returns:
+                bool
+        """
         for n in range(1, len(data)):
             if not data[n-1] < data[n]:
                 if raise_exam:
@@ -101,31 +161,76 @@ class CSVTimeSeriesFile(CSVFile):
         return True
     
     def is_data_purified(self, data):
-        if not isinstance(data, list):
+        """
+            Check if data is purified:
+                - list<list<int, float>>
+                - ordered
+                - value not duplicate
+                
+            Args:
+                list<list<any, any>> data
+
+            Returns:
+                bool
+        """
+        if not isinstance(data, (list, tuple)):
             return False
         
         for item in data:
-            if not isinstance(item, list) or not isinstance(item[0], int) or not isinstance(item[1], float):
+            if not isinstance(item, (list, tuple)) or not isinstance(item[0], int) or not isinstance(item[1], float):
                 return False
         
         return self.check_order(data, raise_exam = False)
 
 class Epoch(object):
     def __init__(self, epoch = None):
+        """
+            Args:
+                int epoch
+        """
         self.epoch = epoch
         self.day = self.date_get_day(self.epoch)
         
     def date_get_day(self, date):
+        """
+            Get epoch in time 00.00.00 of the same day
+
+            Args:
+                int date: epoch
+
+            Returns:
+                int
+        """
         if date >= 0:
             return date - (date % 86400)
-        return (abs(date) - (abs(date) % 86400)) * (-1)
+        return (abs(date) - (abs(date) % 86400) + 86400) * (-1)
     
-    def __lt__(self, other): # less than in epoch comparison
+    def __lt__(self, other):
+        """
+            self < other
+            self less than other
+
+            Args:
+                Epoch other
+
+            Returns:
+                bool
+        """
         if isinstance(other, Epoch):
             return self.epoch < other.epoch
         return False
     
-    def __gt__(self, other): # greater than in epoch comparison
+    def __gt__(self, other):
+        """
+            self > other
+            self greater than other
+
+            Args:
+                Epoch other
+
+            Returns:
+                bool
+        """
         if isinstance(other, Epoch):
             return self.epoch > other.epoch
         return True
@@ -133,10 +238,21 @@ class Epoch(object):
 
 class DayTemps(object):
     def __init__(self):
+        """
+            Data collection
+            Divide values in list of days and give a list of epochs of starting day
+        """
         self.data = {}
         self.days = []
         
     def add(self, day, temp):
+        """
+            Add data to data collection
+
+            Args:
+                int day: epoch of day at time 00.00.00
+                float temp
+        """
         if not day in self.days:
             self.days.append(day)
             self.data[day] = []
@@ -144,6 +260,18 @@ class DayTemps(object):
         
 
 def compute_daily_max_difference(data):
+    """
+        Return a list of the temperature escursion list by day
+
+        Args:
+            list<list<any, any>> data: should be in format list<list<int, float>>
+
+        Raises:
+            ExamException
+
+        Returns:
+            list<float>
+    """
     if not CSVTimeSeriesFile().is_data_purified(data):
         data = CSVTimeSeriesFile().purify_data(data)
     last_date = None
@@ -167,11 +295,3 @@ def compute_daily_max_difference(data):
             output.append(max(day_data.data[day]) - min(day_data.data[day]))
     
     return output
-
-
-if __name__ == "__main__":
-    x = CSVTimeSeriesFile("data.csv")
-    # print(x.get_data())
-    d = compute_daily_max_difference(x.get_data())
-    for item in d:
-        print(item)
