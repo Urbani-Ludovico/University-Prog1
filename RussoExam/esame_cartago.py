@@ -14,11 +14,13 @@ class CSVFile():
         
         # Controllo eisistenza e leggibilità del file
         try:
-            file_content = open(self.file_name)
-
-        # Ottengo le liste dei campi delle singole righe  
-            processed_data = [line.strip().split(",") for line in file_content.read().split("\n")]
-            file_content.close()
+            # Provo ad aprire il file e leggerlo
+            file = open(self.file_name,"r")
+            file_content = file.read()
+            # Ottengo le liste dei campi delle singole righe  
+            processed_data = [line.strip().split(",") for line in file_content.split("\n")]
+            file.close()
+            
         except Exception as e:
             raise ExamException("Errore! {}".format(e))
         
@@ -63,12 +65,12 @@ class CSVTimeSeriesFile(CSVFile):
 
 
 def utc_day(epoch):
-    return epoch - (epoch % 86400)
+    return epoch - (epoch % 86400) 
 
 def compute_daily_max_difference(data):
     
     # Controllo se i dati hanno la forma di una lista
-    if not isinstance(data, (list, tuple)):
+    if not isinstance(data, list):
         raise ExamException("Errore! L'input deve essere una lista")
     
     if len(data) == 0:
@@ -83,22 +85,23 @@ def compute_daily_max_difference(data):
 
     for element in data[1:]:
         epoch, temperature = element
-        #print(current_day_temperatures)
-        # Se il giorno non cambia
+        # Se il giorno cambia
         if not utc_day(epoch) == current_day:
+            # Ho un solo valore
             if len(current_day_temperatures) == 1:
                 processed_data.append(None)
             else:
                 processed_data.append(max(current_day_temperatures) - min(current_day_temperatures))
-            
             current_day = utc_day(epoch)
             current_day_temperatures = [temperature]
         
+        # Se il giorno rimane lo stesso
         else:
             current_day_temperatures.append(temperature)     
 
     # Processo gli ultimi elementi della lista
     if current_day_temperatures != []:
+        # Ho un solo valore
         if len(current_day_temperatures) == 1:
             processed_data.append(None)
         else:

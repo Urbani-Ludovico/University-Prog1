@@ -164,8 +164,6 @@ class CSVTimeSeriesFile(CSVFile):
         """
             Check if data is purified:
                 - list<list<int, float>>
-                - ordered
-                - value not duplicate
                 
             Args:
                 list<list<any, any>> data
@@ -180,7 +178,7 @@ class CSVTimeSeriesFile(CSVFile):
             if not isinstance(item, (list, tuple)) or not isinstance(item[0], int) or not isinstance(item[1], float):
                 return False
         
-        return self.check_order(data, raise_exam = False)
+        return True
 
 class Epoch(object):
     def __init__(self, epoch = None):
