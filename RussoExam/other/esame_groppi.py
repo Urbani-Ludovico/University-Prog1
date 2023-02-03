@@ -8,8 +8,8 @@ class CSVFile():
 class CSVTimeSeriesFile(CSVFile):
     
     def get_data(self):
-        try:
-            file=open(self.name)
+        try: # test validità del file
+            file=open(self.name, 'r')
             for linea in file:
                 pass
             file.close()
@@ -30,7 +30,7 @@ class CSVTimeSeriesFile(CSVFile):
             except:
                 pass
             # nel momento in cui un timestamp è fuori norma il get_data viene fermato
-            if len(lista)>2 and lista[-1][0]<=lista[-2][0]:
+            if len(lista)>2 and lista[-1][0]<=lista[-2][0]: # verifica validità ultimo dato
                 myfile.close()
                 raise ExamException('timestamp fuori ordine')
             elif len(lista)==2 and lista[1][0]<=lista[0][0]:
@@ -44,8 +44,23 @@ def compute_daily_max_difference(lista):
         raise ExamException('{} non è una lista'.format(lista))
     if len(lista) == 0:
         return []
-    temp_data=[lista[0]]
+    line=iter(lista)
+    temp_data=[line]
     ris=[]
+    if line[0]<0:
+        line=next(lista)
+        while line[0]<0:
+            if int(temp_data[0][0]/86400)==int(lista[line][0]/86400):
+                temp_data.append(lista[line])
+            else:
+                if len(temp_data)==1:
+                    ris.append(None)
+                else:
+                    num=diff_max_min_lista(temp_data)
+                    ris.append(num)
+                temp_data=[lista[line]]
+                
+            temp_data.append(line)
     for line in range(1,len(lista)):
         if int(temp_data[0][0]/86400)==int(lista[line][0]/86400):
         # controlliamo se i dati presi prima sono della stessa giornata di quelli in esame
@@ -54,36 +69,24 @@ def compute_daily_max_difference(lista):
             if len(temp_data)==1:
                 ris.append(None)
             else:
-                massimo=temp_data[0][1] # assumiamo il primo valore come massimo e minimo
-                minimo=temp_data[0][1]
-                for dato in temp_data:
-                    if dato[1]>massimo:
-                        massimo=dato[1]
-                    if dato[1]<minimo:
-                        minimo=dato[1]
-                ris.append(massimo-minimo)
+                num=diff_max_min_lista(temp_data)
+                ris.append(num)
             temp_data=[lista[line]]
             # alla fine modifichiamo la temp_data e ci mettiamo solo la lista[line]
     # alla fine del ciclo calcolo l'ultima giornata
     if len(temp_data)==1:
         ris.append(None)
     else:
-        massimo=temp_data[0][1] # assumiamo il primo valore come massimo e minimo
-        minimo=temp_data[0][1]
-        for dato in temp_data:
-            if dato[1]>massimo:
-                massimo=dato[1]
-            if dato[1]<minimo:
-                minimo=dato[1]
-        ris.append(massimo-minimo)
+        num=diff_max_min_lista(temp_data) # si calcola un ultima volta il maxmin sull'ultima giornata
+        ris.append(num)
     return ris
-        
-    # controllo che sia una lista
-    # è dato per assunto che la lista 
-    # ciclando su tutte le righe della lista data
-    # prendo il primo giorno di una giornata e creo una lista con tutte le rilevazioni di una giornata
-# my_file=CSVTimeSeriesFile('data.txt')
-# lista=my_file.get_data()
-# print('ecco la lista {}  fine lista'.format(lista))
-# ris=compute_daily_max_difference(lista)
-# print(ris)
+
+def diff_max_min_lista(lista):
+    massimo=lista[0][0]
+    minimo=lista[0][0]
+    for i in lista:
+        if i[1]<minimo:
+            minimo=i[1]
+        if i[1]>massimo:
+            massimo=1[1]
+    return(massimo-minimo)
